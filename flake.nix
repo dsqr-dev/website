@@ -16,7 +16,7 @@
         devShells.default = pkgs-unstable.mkShell {
           buildInputs = with pkgs-unstable; [
             nodejs_22
-            bun
+            nodePackages.pnpm
           ];
           
           shellHook = ''

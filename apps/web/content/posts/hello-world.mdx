@@ -1,0 +1,31 @@
+---
+title: "Hello World"
+date: "March 2025"
+category: "Blog"
+description: "hello world"
+---
+
+As a developer, I'm always looking for ways to streamline my workflow and make my development environment more reproducible.
+
+<Important>
+  This guide assumes you're using macOS and have basic familiarity with terminal commands.
+</Important>
+
+## Code Examples
+
+Here's some TypeScript code:
+
+```typescript
+interface Config {
+  runtime: 'node' | 'edge'
+  regions?: string[]
+}
+
+export default function getConfig(): Config {
+  return {
+    runtime: 'edge',
+    regions: ['sfo1', 'iad1']
+  }
+}
+```
+

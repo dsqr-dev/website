@@ -1,6 +1,9 @@
+import { withContentlayer } from 'next-contentlayer'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@workspace/ui"],
+  reactStrictMode: true,
 }
 
-export default nextConfig
+export default withContentlayer(nextConfig)

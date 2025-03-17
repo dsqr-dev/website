@@ -1,0 +1,131 @@
+---
+title: "Using Nix to Keep typescript-go Up to Date"
+date: "March 2025"
+category: "NixWithMe"
+description: "You can use Nix alongside the typescript-go-overlay I've created to stay up to date with the most recent typescript-go build"
+---
+
+As you may have seen, Microsoft is porting the TypeScript project to Go. You can read more about it in [Microsoft's official announcement](https://devblogs.microsoft.com/typescript/typescript-native-port/) and find the source code in the [microsoft/typescript-go repository](https://github.com/microsoft/typescript-go).
+
+This port has been long anticipated by many in the community, and I'm personally very excited about it. After spending a weekend exploring the project, I wanted to ensure I could stay up-to-date as development progresses.
+
+Since I use [NixOS](https://nixos.org/) for most of my development work, I created a flake overlay that enables nightly updates based on the latest commits. This approach eliminates the need for manual updates - the Nix flake handles nightly updates automatically, and my development environment's Nix configuration simply imports it.
+
+## How It Works
+
+The overlay watches the typescript-go repository for new commits and rebuilds the package when changes are detected. This ensures you're always running the latest version without having to manually check for updates or rebuild.
+
+<Important>
+  The base foundation was taken from this [zig overlay](https://github.com/mitchellh/zig-overlay/tree/main) credit to that project. 
+</Important>
+
+## Usage
+
+You can use it with most standard flake implementation patterns.
+
+### Flake
+In your `flake.nix` file:
+```typescript
+{
+  inputs.typescript-go-overlay.url = "github:0xdsqr/typescript-go-overlay";
+  outputs = { self, typescript-go-overlay, ... }: {
+    # Your outputs here
+  };
+}
+```
+
+In a shell:
+```typescript
+# Run the latest nightly version
+$ nix run 'github:0xdsqr/typescript-go-overlay'
+# Open a shell with the latest nightly version
+$ nix shell 'github:0xdsqr/typescript-go-overlay'
+```
+
+### Direct Package Usage
+You can use typescript-go-overlay directly in your flake, similar to how you might use zig-overlay:
+```typescript
+{
+  description = "Your Project";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    typescript-go-overlay.url = "github:0xdsqr/typescript-go-overlay";
+  };
+  outputs = { self, nixpkgs, typescript-go-overlay }: 
+    let
+      forAllSystems = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ];
+    in {
+      # Access in your packages
+      packages = forAllSystems (system: {
+        default = nixpkgs.legacyPackages.${system}.callPackage ./nix/package.nix {
+          typescript-go = typescript-go-overlay.packages.${system}.typescript-go;
+        };
+      });
+      
+      # Access in your devShells
+      devShells = forAllSystems (system: {
+        default = nixpkgs.legacyPackages.${system}.callPackage ./nix/devShell.nix {
+          typescript-go = typescript-go-overlay.packages.${system}.typescript-go;
+        };
+      });
+    };
+}
+```
+
+### Alternative: Using as an Overlay
+If you prefer, you can also use typescript-go-overlay as a nixpkgs overlay:
+```typescript
+# In your flake.nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    typescript-go-overlay.url = "github:0xdsqr/typescript-go-overlay";
+  };
+  
+  outputs = { self, nixpkgs, typescript-go-overlay, ... }:
+    let
+      system = "x86_64-linux";
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ typescript-go-overlay.overlay ];
+      };
+    in {
+      # Now typescript-go is available directly in pkgs
+      devShells.${system}.default = pkgs.mkShell {
+        buildInputs = [ pkgs.typescript-go ];
+      };
+    };
+}
+```
+
+### With Home Manager
+```typescript
+# In your home.nix
+{ config, pkgs, inputs, ... }:
+{
+  home.packages = [
+    inputs.typescript-go-overlay.packages.${pkgs.system}.typescript-go
+  ];
+}
+```
+
+### Direct Command Line Usage
+You can also use it directly without configuration:
+```typescript
+# Install the latest nightly build
+nix profile install github:0xdsqr/typescript-go-overlay
+# Run typescript-go
+tsgo --help
+# Use the TypeScript compiler via Go
+tsc-go --version
+```
+
+## Contributing
+
+If you find this overlay useful, consider contributing to either the [typescript-go project](https://github.com/microsoft/typescript-go) or this overlay. Both projects are open to contributions and feedback as they continue to mature.
+
+The TypeScript team has been very responsive to community input during this port, making it an excellent time to get involved.
+
+---
+
+*Note: The TypeScript-Go project is still in active development and may not have feature parity with the original TypeScript implementation yet. Check the official repository for the current status.*

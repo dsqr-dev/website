@@ -9,7 +9,7 @@ interface PostListProps {
   posts: Post[]
 }
 
-type CategoryFilter = "All" | "TIL" | "Blog" | "Life"
+type CategoryFilter = "All" | "TIL" | "Blog" | "Life" | "NixWithMe"
 
 export function PostList({ posts }: PostListProps) {
   const [sortAscending, setSortAscending] = useState(false)

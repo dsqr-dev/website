@@ -1,7 +1,8 @@
-# syntax=docker/dockerfile:1
+# --------------- Base Stage ---------------
+FROM node:22-alpine AS base
 
-# --------------- Build Stage ---------------
-FROM node:20-alpine AS base
+# Install dependencies needed for native modules
+RUN apk add --no-cache libc6-compat python3 make g++
 
 # Install pnpm
 ENV PNPM_HOME="/pnpm"
@@ -11,7 +12,7 @@ RUN corepack enable
 # Set working directory
 WORKDIR /app
 
-# Install dependencies only when needed
+# --------------- Dependencies Stage ---------------
 FROM base AS deps
 WORKDIR /app
 
@@ -22,25 +23,32 @@ COPY packages/eslint-config/package.json ./packages/eslint-config/
 COPY packages/typescript-config/package.json ./packages/typescript-config/
 COPY packages/ui/package.json ./packages/ui/
 
-# Install dependencies
+# Install all dependencies including dev dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
-# --------------- Build Stage ---------------
+# Install missing dependencies reported in the build error
+RUN pnpm add -w autoprefixer postcss-import tailwindcss-animate --save-dev
+
+# --------------- Builder Stage ---------------
 FROM base AS builder
 WORKDIR /app
 
-# Copy all files
+# Copy all files and dependencies
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=deps /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY . .
 
-# Set NODE_ENV to production for optimized build
+# Set environment variables
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Generate Contentlayer files and build the app
 RUN pnpm run build
 
 # --------------- Production Stage ---------------
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 # Set environment variables

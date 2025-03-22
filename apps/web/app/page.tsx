@@ -29,7 +29,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-        <footer className="mt-16 py-8 border-t border-border flex items-center justify-between text-sm text-muted-foreground">
+        <footer className="mt-8 py-6 border-t border-border flex items-center justify-between text-sm text-muted-foreground">
           <div>Dave Dennis (@0xdsqr)</div>
           <Link href="https://github.com/dsqr-dev" className="hover:text-primary transition-colors">
             <GithubIcon className="w-5 h-5" />

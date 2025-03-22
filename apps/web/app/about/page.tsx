@@ -3,7 +3,7 @@ import { SocialLinks } from "@/components/social-links"
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <main className="max-w-2xl mx-auto px-4 py-8">
+      <main className="max-w-2xl mx-auto px-4 pt-16 pb-8">
         <SocialLinks />
         <div className="prose dark:prose-invert max-w-none">
           <h1 className="text-2xl font-bold mb-6">About</h1>

@@ -6,9 +6,54 @@ import Link from "next/link"
 import { Input } from "@workspace/ui/components/input"
 import { Button } from "@workspace/ui/components/button"
 import me from "@/public/me.png"
+import { CheckIcon, Loader2Icon } from "lucide-react"
+
+// Create a server action file
+// This would go in app/actions/newsletter.ts in a real implementation
+async function subscribeToNewsletter(email: string) {
+  // Mock API call
+  // In the future, this will write to your database
+  console.log("Subscribing email to newsletter:", email)
+  
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  return { success: true }
+}
 
 export function Newsletter() {
   const [email, setEmail] = useState("")
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [errorMessage, setErrorMessage] = useState("")
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    
+    // Simple validation
+    if (!email || !email.includes("@")) {
+      setStatus("error")
+      setErrorMessage("Please enter a valid email address")
+      return
+    }
+    
+    try {
+      setStatus("loading")
+      
+      // Call the server action
+      const result = await subscribeToNewsletter(email)
+      
+      if (result.success) {
+        setStatus("success")
+        setEmail("")
+      } else {
+        throw new Error("Failed to subscribe")
+      }
+    } catch (error) {
+      console.error("Subscription error:", error)
+      setStatus("error")
+      setErrorMessage("Something went wrong. Please try again.")
+    }
+  }
 
   return (
     <div className="flex flex-col items-center justify-center space-y-8">
@@ -49,18 +94,38 @@ export function Newsletter() {
         </p>
         <p className="mt-4 text-sm sm:text-base">I also write sometimes. Stay connected if you want.</p>
       </div>
-      <div className="flex w-full max-w-md gap-4 px-4 mt-4">
-        <Input
-          type="email"
-          placeholder="m@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="bg-background border-border"
-        />
-        <Button className="px-8 bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700">
-          Subscribe
-        </Button>
-      </div>
+      <form onSubmit={handleSubmit} className="w-full max-w-md px-4">
+        <div className="flex gap-4">
+          <Input
+            type="email"
+            placeholder="m@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="bg-background border-border"
+            disabled={status === "loading" || status === "success"}
+          />
+          <Button 
+            type="submit"
+            className="px-8 bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700"
+            disabled={status === "loading" || status === "success"}
+          >
+            {status === "loading" ? (
+              <Loader2Icon className="w-4 h-4 animate-spin mr-2" />
+            ) : status === "success" ? (
+              <CheckIcon className="w-4 h-4 mr-2" />
+            ) : null}
+            {status === "success" ? "Subscribed" : "Subscribe"}
+          </Button>
+        </div>
+        
+        {status === "error" && (
+          <p className="text-sm text-red-500 mt-2">{errorMessage}</p>
+        )}
+        
+        {status === "success" && (
+          <p className="text-sm text-green-500 mt-2">Thanks for subscribing!</p>
+        )}
+      </form>
     </div>
   )
 }

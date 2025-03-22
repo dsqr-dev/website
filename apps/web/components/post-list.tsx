@@ -96,7 +96,11 @@ export function PostList({ posts }: PostListProps) {
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <CalendarIcon className="w-4 h-4 flex-shrink-0" />
-                    <span>{post.date}</span>
+                    <span>{new Date(post.date).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}</span>
                   </span>
                   <div className="flex items-center gap-1">
                     <EyeIcon className="w-4 h-4 flex-shrink-0" />

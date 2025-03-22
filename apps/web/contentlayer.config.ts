@@ -3,14 +3,27 @@ import rehypePrettyCode from "rehype-pretty-code"
 import rehypeSlug from "rehype-slug"
 import rehypeAutolinkHeadings from "rehype-autolink-headings"
 import remarkGfm from "remark-gfm"
-import type { Node } from "unist"
 
-// Add types for unist Node
-interface UnistNode extends Node {
+// Manually define our own Node type instead of importing from unist
+interface UnistNode {
   type: string
-  children?: UnistNode[]
+  tagName?: string
+  value?: string
+  name?: string
   properties?: {
-    className?: string[]
+    className?: string[] 
+    [key: string]: any
+  }
+  attributes?: {
+    [key: string]: any
+  }
+  children?: UnistNode[]
+  data?: {
+    [key: string]: any
+  }
+  position?: {
+    start: { line: number; column: number; offset: number }
+    end: { line: number; column: number; offset: number }
   }
 }
 
@@ -24,7 +37,7 @@ export const Post = defineDocumentType(() => ({
       required: true,
     },
     date: {
-      type: "string",
+      type: "date",
       required: true,
     },
     category: {
@@ -52,13 +65,18 @@ export default makeSource({
     contentDirPath: "./content",
     documentTypes: [Post],
     mdx: {
-      remarkPlugins: [remarkGfm],
+      remarkPlugins: [remarkGfm as any],
       rehypePlugins: [
-        rehypeSlug,
+        rehypeSlug as any,
         [
-          rehypePrettyCode,
+          rehypePrettyCode as any,
           {
             theme: "github-dark",
+            keepBackground: true,
+            // Add explicit support for Nix
+            languageMapping: {
+              nix: 'nix'
+            },
             onVisitLine(node: UnistNode) {
               // Prevent lines from collapsing in `display: grid` mode, and allow empty
               // lines to be copy/pasted
@@ -79,7 +97,7 @@ export default makeSource({
           },
         ],
         [
-          rehypeAutolinkHeadings,
+          rehypeAutolinkHeadings as any,
           {
             properties: {
               className: ["subheading-anchor"],

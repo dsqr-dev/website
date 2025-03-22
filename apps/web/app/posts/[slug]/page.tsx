@@ -5,34 +5,35 @@ import { Breadcrumb } from "@/components/breadcrumb"
 import { Mdx } from "@/components/mdx-components"
 import { CalendarIcon, EyeIcon, TagIcon } from "lucide-react"
 
-interface PostPageProps {
-  params: {
-    slug: string
-  }
-  searchParams: Record<string, string | string[]>
-}
+// Set rendering mode
+export const dynamic = 'auto'
+export const dynamicParams = true
 
 export async function generateStaticParams() {
-  return allPosts.map((post) => ({
-    slug: post.slug,
-  }))
+  // Temporarily return no static paths to avoid build issues
+  return []
 }
 
-export default async function PostPage({ params }: PostPageProps) {
-  const slug = await params.slug
+export default async function Page({
+  params,
+}: {
+  params: { slug: string }
+}) {
+  const { slug } = await params
+  
   const post = allPosts.find((post) => post.slug === slug)
-
+  
   if (!post) {
     notFound()
   }
 
   return (
-    <main className="max-w-2xl mx-auto px-4 py-12">
+    <main className="max-w-2xl mx-auto px-4 pt-16 pb-12">
       <Breadcrumb
         items={[
           { label: "0xdsqr", href: "/" },
           { label: "posts", href: "/posts" },
-          { label: slug, href: `/posts/${slug}` },
+          { label: post.title, href: `/posts/${slug}` },
         ]}
       />
       <article className="mt-8">
@@ -41,7 +42,11 @@ export default async function PostPage({ params }: PostPageProps) {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-4 h-4" />
-              {post.date}
+              {new Date(post.date).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+              })}
             </div>
             <div className="flex items-center gap-2">
               <EyeIcon className="w-4 h-4" />1
@@ -60,7 +65,10 @@ export default async function PostPage({ params }: PostPageProps) {
             </div>
           </div>
         </div>
-        <Mdx code={post.body.code} />
+        <div className="prose dark:prose-invert max-w-none">
+          {/* Import and use the Mdx component to render MDX content */}
+          <Mdx code={post.body.code} />
+        </div>
       </article>
     </main>
   )

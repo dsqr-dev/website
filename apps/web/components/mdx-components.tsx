@@ -5,8 +5,6 @@ import type React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useMDXComponent } from "next-contentlayer/hooks"
-import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter"
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
 
 const components = {
   Important: ({ children }: { children: React.ReactNode }) => (
@@ -59,9 +57,25 @@ const components = {
       />
     )
   },
-  img: ({ src = "", alt = "", ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <Image src={src || "/placeholder.svg"} alt={alt} className="rounded-md my-4" width={720} height={400} {...props} />
-  ),
+  img: ({ src = "", alt = "", ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+    // Extract width/height from props and ensure they are numbers
+    const { width: propsWidth, height: propsHeight, ...restProps } = props;
+    
+    // Use default values or convert to numbers if provided
+    const width = typeof propsWidth === 'number' ? propsWidth : 720;
+    const height = typeof propsHeight === 'number' ? propsHeight : 400;
+    
+    return (
+      <Image 
+        src={src || "/placeholder.svg"} 
+        alt={alt} 
+        className="rounded-md my-4" 
+        width={width} 
+        height={height} 
+        {...restProps} 
+      />
+    );
+  },
   hr: ({ ...props }: React.HTMLAttributes<HTMLHRElement>) => (
     <hr className="my-8 border-gray-300 dark:border-gray-700" {...props} />
   ),
@@ -77,13 +91,23 @@ const components = {
     <th className="text-left py-2 px-4 font-semibold" {...props} />
   ),
   td: ({ ...props }: React.HTMLAttributes<HTMLTableCellElement>) => <td className="py-2 px-4" {...props} />,
-  code: ({ className, ...props }: React.HTMLAttributes<HTMLElement>) => {
+  code: ({ className, children, ...props }: React.HTMLAttributes<HTMLElement>) => {
     const match = /language-(\w+)/.exec(className || "")
 
     return match ? (
-      <SyntaxHighlighter style={vscDarkPlus} language={match[1]} PreTag="div" className="rounded-md my-4" {...props} />
+      <div className="rounded-md my-6 overflow-hidden dark:bg-gray-900 bg-gray-50">
+        <div className="overflow-x-auto">
+          <pre className="p-4 text-sm leading-relaxed">
+            <code className={className} {...props}>
+              {children}
+            </code>
+          </pre>
+        </div>
+      </div>
     ) : (
-      <code className="bg-gray-200 dark:bg-gray-800 rounded px-1" {...props} />
+      <code className="bg-gray-200 dark:bg-gray-800 rounded px-1.5 py-0.5 text-sm font-mono" {...props}>
+        {children}
+      </code>
     )
   },
 }
@@ -93,12 +117,32 @@ interface MdxProps {
 }
 
 export function Mdx({ code }: MdxProps) {
-  const MDXContent = useMDXComponent(code)
-
-  return (
-    <div className="mdx prose dark:prose-invert prose-pre:p-0 w-full max-w-none">
-      <MDXContent components={components} />
-    </div>
-  )
+  // Handle case where code might be undefined or null
+  if (!code) {
+    return null;
+  }
+  
+  // Use try/catch to handle any errors with MDX component creation
+  try {
+    const MDXContent = useMDXComponent(code)
+    
+    if (!MDXContent) {
+      console.warn("MDXContent is undefined, returning null");
+      return null;
+    }
+    
+    return (
+      <div className="mdx prose dark:prose-invert prose-pre:p-0 prose-code:text-sm prose-code:font-normal w-full max-w-none">
+        <MDXContent components={components} />
+      </div>
+    )
+  } catch (error) {
+    console.error("Error rendering MDX content:", error);
+    return (
+      <div className="bg-red-50 dark:bg-red-900/30 p-4 rounded">
+        <p className="text-red-800 dark:text-red-200">Error rendering content.</p>
+      </div>
+    );
+  }
 }
 

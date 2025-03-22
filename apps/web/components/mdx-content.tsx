@@ -7,6 +7,11 @@ interface MDXContentProps {
   content: string
 }
 
+interface CodeProps extends React.HTMLAttributes<HTMLElement> {
+  inline?: boolean;
+  className?: string;
+}
+
 export function MDXContent({ content }: MDXContentProps) {
   return (
     <ReactMarkdown
@@ -18,26 +23,25 @@ export function MDXContent({ content }: MDXContentProps) {
         ul: (props) => <ul className="list-disc list-inside mb-6 space-y-2" {...props} />,
         ol: (props) => <ol className="list-decimal list-inside mb-6 space-y-2" {...props} />,
         li: (props) => <li className="leading-relaxed" {...props} />,
-        img: (props) => (
-          <div className="my-6">
-            <Image src={props.src || ""} alt={props.alt || ""} width={800} height={400} className="rounded-lg" />
-          </div>
-        ),
-        code: ({ inline, className, children, ...props }) => {
+        img: (props) => {
+          // Extract width/height and ensure they are numbers
+          const width = typeof props.width === 'number' ? props.width : 800;
+          const height = typeof props.height === 'number' ? props.height : 400;
+          
+          return (
+            <div className="my-6">
+              <Image src={props.src || ""} alt={props.alt || ""} width={width} height={height} className="rounded-lg" />
+            </div>
+          );
+        },
+        code: ({ inline, className, children, ...props }: CodeProps) => {
           const match = /language-(\w+)/.exec(className || "")
-          return !inline && match ? (
+          return inline === false && match ? (
             <div className="my-6 overflow-hidden rounded-lg bg-[#1E1E1E] shadow-lg">
               <SyntaxHighlighter
-                style={oneDark}
+                style={oneDark as any}
                 language={match[1]}
                 PreTag="div"
-                showLineNumbers={false}
-                customStyle={{
-                  margin: 0,
-                  padding: "1.5rem",
-                  background: "#1E1E1E",
-                }}
-                {...props}
               >
                 {String(children).replace(/\n$/, "")}
               </SyntaxHighlighter>

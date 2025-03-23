@@ -1,0 +1,180 @@
+---
+title: "Hello World"
+date: "2025-03-01"
+category: "Blog"
+description: "hello world"
+---
+
+# MDX Component Test Page
+
+This page demonstrates all the custom MDX components and styling features available in our blog.
+
+## Callout Components
+
+### Important
+
+<Important>This is an Important callout. Use it for critical information that readers must know. It supports **markdown formatting** within the callout.</Important>
+
+### Note
+
+<Note>This is a Note callout. Use it for additional information or context. It's useful for supplementary details that might be helpful but aren't critical.</Note>
+
+### Tip
+
+<Tip>This is a Tip callout. Use it for helpful suggestions or best practices. Tips can help readers optimize their workflow or learn advanced techniques.</Tip>
+
+### Warning
+
+<Warning>This is a Warning callout. Use it to highlight potential issues or cautions. Warnings help readers avoid common mistakes or pitfalls.</Warning>
+
+### Caution
+
+<Caution>This is a Caution callout. Use it for serious warnings about dangerous actions. Cautions indicate high-risk situations that could cause significant problems.</Caution>
+
+## Text Formatting
+
+Here are examples of various text formatting options:
+
+**Bold text** for emphasis
+
+*Italic text* for subtle emphasis
+
+~~Strikethrough~~ for indicating removed content
+
+`Inline code` for short code snippets
+
+## Links
+
+[External link](https://example.com) - This links to an external website
+
+[Internal link](/about) - This links to an internal page
+
+## Lists
+
+### Unordered List
+
+- Item one
+- Item two
+- Item three
+  - Nested item
+  - Another nested item
+
+### Ordered List
+
+1. First item
+2. Second item
+3. Third item
+   1. Nested numbered item
+   2. Another nested item
+
+## Blockquote
+
+> This is a blockquote. It's useful for highlighting quoted content or for adding emphasis to a particular passage.
+>
+> It can span multiple paragraphs and include *formatting*.
+
+## Tables
+
+| Column 1 | Column 2 | Column 3 |
+|----------|----------|----------|
+| Cell 1-1 | Cell 1-2 | Cell 1-3 |
+| Cell 2-1 | Cell 2-2 | Cell 2-3 |
+| Cell 3-1 | Cell 3-2 | Cell 3-3 |
+
+## Code Blocks
+
+### JavaScript
+
+```javascript
+function greet(name) {
+  return `Hello, ${name}!`;
+}
+
+const message = greet('World');
+console.log(message); // Outputs: Hello, World!
+```
+
+### TypeScript
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email?: string;
+}
+
+function getUserInfo(user: User): string {
+  return `User ${user.name} (ID: ${user.id})`;
+}
+
+const user: User = {
+  id: 1,
+  name: 'John Doe'
+};
+
+console.log(getUserInfo(user));
+```
+
+### Bash/Shell
+
+```bash
+#!/bin/bash
+echo "Starting deployment..."
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Deploy to production
+scp -r ./dist user@server:/var/www/app
+
+echo "Deployment completed!"
+```
+
+### CSS/SCSS
+
+```css
+.container {
+  display: flex;
+  flex-direction: column;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.card {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  background-color: white;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+```
+
+## Images
+
+Here's an example image:
+
+![Sample Image](/me.png)
+
+## Horizontal Rule
+
+Use horizontal rules to separate content sections:
+
+---
+
+## Heading Levels
+
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+
+As a developer, I'm always looking for ways to streamline my workflow and make my development environment more reproducible.

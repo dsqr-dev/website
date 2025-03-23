@@ -25,6 +25,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@babel/runtime-corejs3": "7.26.10",
     "@turbo/gen": "^2.2.3",
     "@types/node": "^22.9.0",
     "@types/react": "18.3.0",

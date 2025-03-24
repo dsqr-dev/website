@@ -21,7 +21,8 @@
   },
   "pnpm": {
     "overrides": {
-      "prismjs": "1.30.0"
+      "prismjs": "1.30.0",
+      "esbuild": "0.25.0"
     }
   }
 }

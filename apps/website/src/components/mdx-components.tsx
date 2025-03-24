@@ -128,17 +128,29 @@ export const mdxComponents = {
   pre: ({ ...props }: React.HTMLAttributes<HTMLPreElement>) => (
     <pre className="rounded-md my-6 overflow-x-auto bg-transparent p-0" {...props} />
   ),
-  code: ({ className, children, ...props }: React.HTMLAttributes<HTMLElement>) => {
+  code: ({ className, children, ...props }: React.HTMLAttributes<HTMLElement> & { 'data-meta'?: string, 'data-language'?: string }) => {
     const match = /language-(\w+)/.exec(className || "")
+    // Check for filename metadata in format ```js filename=example.js
+    const filenameMatch = props['data-meta']?.match(/filename=([^\s]+)/)
+    const language = props['data-language'] || match?.[1] || ''
+    
+    let updatedClassName = className || ""
+    if (filenameMatch) {
+      updatedClassName += ` filename-${filenameMatch[1]}`
+    }
 
     return match ? (
-      // Do minimal styling here since SyntaxHighlighter handles these blocks
-      <code className={className} {...props}>
+      // Code block styling - minimal here as rehype plugin handles most styling
+      <code 
+        className={updatedClassName} 
+        {...props}
+        data-language={language}
+      >
         {children}
       </code>
     ) : (
       // Inline code styling
-      <code className="bg-gray-200 dark:bg-gray-800 rounded px-1.5 py-0.5 text-sm font-mono" {...props}>
+      <code className="font-mono text-sm px-1.5 py-0.5 rounded bg-gray-100/70 dark:bg-gray-800/70 border border-gray-200/30 dark:border-gray-700/30" {...props}>
         {children}
       </code>
     )

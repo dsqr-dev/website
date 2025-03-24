@@ -31,16 +31,7 @@ export default function HomePage() {
       <main className="max-w-2xl mx-auto px-4 pt-16 pb-8">
         <SocialLinks />
         
-        {/* Just showing the profile picture while hiding other Newsletter content */}
-        <div className="flex flex-col items-center justify-center my-8">
-          <div className="w-16 h-16 md:w-24 md:h-24 rounded-lg overflow-hidden bg-muted">
-            <img
-              src="/me.png"
-              alt="0xdsqr"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
+        <Newsletter />
         
         <div className="mt-8">
           {loading ? (

@@ -100,10 +100,10 @@ function normalizeRoute(route: string): string {
   path = path.endsWith('/') ? path.slice(0, -1) : path;
   
   // Remove query parameters
-  path = path.split('?')[0];
+  path = path.split('?')[0] || '';
   
   // Remove hash
-  path = path.split('#')[0];
+  path = path.split('#')[0] || '';
   
   return path;
 }

@@ -21,12 +21,12 @@ type NewsletterFormValues = z.infer<typeof newsletterSchema>
 // Simulated API call
 async function subscribeToNewsletter(email: string) {
   // Log the email for now
-  console.log(`Subscribing email: ${email}`)
+  console.log(`Email submitted: ${email}`)
   
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 1000))
   
-  return { success: true }
+  return { success: true, message: "Feature coming soon" }
 }
 
 export function Newsletter() {
@@ -94,57 +94,46 @@ export function Newsletter() {
           <span className="italic border-b-2 border-dotted border-orange-400 text-orange-600 dark:text-orange-300">
             &quot;the cloud&quot;
           </span>
-          . Working on Cloud{" "}
-          <span className="text-[#0033A0] dark:text-[#00B4F4] font-medium italic border-b-2 border-dotted border-[#0033A0] dark:border-[#00B4F4]">
-            @Goldman Sachs
-          </span>
-          . Building{" "}
-          <a
-            href="https://github.com/yourusername/dsqr"
-            className="italic border-b-2 border-dotted border-purple-500 text-purple-500 dark:text-purple-400"
+          .{" "}
+          <Link
+            to="/about"
+            className="italic border-b-2 border-dotted border-purple-500 text-purple-500 dark:text-purple-400 font-medium"
           >
-            dsqr
-          </a>
-          .
+            More About Me
+          </Link>
         </p>
         <p className="mt-4 text-sm sm:text-base">I also write sometimes. Stay connected if you want.</p>
       </div>
       
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-md px-4" autoComplete="off">
-          <div className="flex gap-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="m@example.com"
-                      className="bg-background border-border"
-                      disabled={status === "loading" || status === "success"}
-                      autoComplete="email"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-xs mt-1 text-red-500" />
-                </FormItem>
-              )}
-            />
-            
-            <Button 
-              type="submit"
-              size="default"
-              className={`px-4 flex items-center justify-center w-28 ${
-                status === "success"
-                  ? "bg-green-500 hover:bg-green-600 text-white"
-                  : isEmailValid && status === "idle"
-                    ? "bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white"
-                    : "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed"
-              }`}
-              disabled={isEmailEmpty || status === "loading" || status === "success" || !isEmailValid}
-            >
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="m@example.com"
+                        className="bg-background border-border"
+                        disabled={status === "loading" || status === "success"}
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              
+              <Button 
+                type="submit"
+                size="default"
+                className="px-4 flex items-center justify-center newsletter-button bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white"
+                disabled={isEmailEmpty || !isEmailValid}
+              >
               {status === "loading" ? (
                 <>
                   <Loader2Icon className="w-4 h-4 animate-spin mr-1" />
@@ -159,11 +148,22 @@ export function Newsletter() {
                 "Subscribe"
               )}
             </Button>
+            </div>
+            
+            <div className="px-2">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormMessage className="text-xs text-red-500" />
+                )}
+              />
+              
+              {status === "success" && (
+                <p className="text-sm text-purple-500">Feature coming soon!</p>
+              )}
+            </div>
           </div>
-          
-          {status === "success" && (
-            <p className="text-sm text-green-500 mt-2">Thanks for subscribing!</p>
-          )}
         </form>
       </Form>
     </div>

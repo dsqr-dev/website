@@ -1,11 +1,56 @@
-import React from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { mdxComponents, Important, Note, Tip, Warning, Caution } from './mdx-components'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+// Import Prism for syntax highlighting
+// @ts-ignore
+import Prism from 'prismjs'
+// Import basic languages
+import 'prismjs/components/prism-javascript'
+import 'prismjs/components/prism-typescript'
+import 'prismjs/components/prism-jsx'
+import 'prismjs/components/prism-tsx'
+import 'prismjs/components/prism-css'
+import 'prismjs/components/prism-bash'
+import 'prismjs/components/prism-json'
+import 'prismjs/components/prism-markdown'
+
+// Add Nix language support manually since it's not included by default
+Prism.languages.nix = {
+  'comment': /#.*/,
+  'string': {
+    pattern: /"(?:[^"\\]|\\[\s\S])*"|''(?:(?!'')[\s\S]|''(?:'|\\|\$\{))*''/,
+    greedy: true,
+    inside: {
+      'interpolation': {
+        pattern: /\$\{[\s\S]*?\}/,
+        inside: {
+          'expression': {
+            pattern: /[\s\S]+/,
+            inside: null // Will be set later
+          }
+        }
+      }
+    }
+  },
+  'keyword': /\b(?:assert|builtins|else|if|in|inherit|let|rec|then|with)\b/,
+  'function': /\b(?:abort|add|all|any|attrNames|attrValues|baseNameOf|compareVersions|concatLists|currentSystem|deepSeq|derivation|dirOf|div|elem(?:At)?|fetchurl|filter|findFile|foldl|foldl'|genList|getAttr|getEnv|hasAttr|hashString|head|import|intersectAttrs|isAttrs|isBool|isFunction|isInt|isList|isString|length|lessThan|listToAttrs|map|mul|nixVersion|parseDrvName|pathExists|readDir|readFile|removeAttrs|replaceStrings|seq|sort|stringLength|sub|substring|tail|throw|toString|toXML|trace|typeOf)\b|\bfetchTarball\b/,
+  'boolean': /\b(?:false|true)\b/,
+  'operator': /[=!<>]=?|\+\+?|\|\||&&|\/\/|->?|[?@]/,
+  'punctuation': /[{}()[\].,:;]/,
+  'number': /\b\d+\b/,
+};
+
+// Self reference for nested expressions
+Prism.languages.nix.string.inside.interpolation.inside.expression.inside = Prism.languages.nix;
+// Import line numbers and line highlight plugins
+import 'prismjs/plugins/line-numbers/prism-line-numbers'
+import 'prismjs/plugins/line-highlight/prism-line-highlight'
+
+// Import our custom rehype plugin
+import { rehypeCodeBlocks } from '../lib/rehype-code-blocks'
 
 interface MdxContentProps {
   content: string
@@ -59,75 +104,158 @@ export function MdxContent({ content }: MdxContentProps) {
   
   const processedContent = processMarkdown(content)
   
+  // Highlight all code blocks after render
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Add a small delay to ensure DOM is fully rendered
+      const timer = setTimeout(() => {
+        Prism.highlightAll()
+      }, 0)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [processedContent])
+  
+  // Enable line numbering when component mounts
+  useEffect(() => {
+    document.querySelectorAll('pre.line-numbers').forEach(pre => {
+      const linesCount = (pre.textContent?.match(/\n/g) || []).length + 1;
+      
+      // Create line number rows
+      const lineNumbersWrapper = document.createElement('span');
+      lineNumbersWrapper.className = 'line-numbers-rows';
+      lineNumbersWrapper.setAttribute('aria-hidden', 'true');
+      
+      let lineNumbersMarkup = '';
+      for (let i = 0; i < linesCount; i++) {
+        lineNumbersMarkup += '<span></span>';
+      }
+      
+      lineNumbersWrapper.innerHTML = lineNumbersMarkup;
+      pre.appendChild(lineNumbersWrapper);
+    });
+  }, [processedContent])
+  
   try {
     return (
       <div className="mdx prose dark:prose-invert prose-pre:p-0 prose-code:text-sm prose-code:font-normal w-full max-w-none">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeSlug, rehypeAutolinkHeadings]}
+          rehypePlugins={[
+            rehypeSlug, 
+            rehypeAutolinkHeadings,
+          ]}
           components={{
             ...mdxComponents,
             // Handle code blocks with syntax highlighting
             code({node, inline, className, children, ...props}: any) {
               const match = /language-(\w+)/.exec(className || '')
-              const codeString = String(children).replace(/\n$/, '')
               
-              // Generate a unique ID for each code block to allow multiple copy buttons
-              const blockId = `code-block-${Math.random().toString(36).substring(2, 9)}`
-              
-              const copyToClipboard = () => {
-                navigator.clipboard.writeText(codeString)
-                  .then(() => {
-                    const copyButton = document.getElementById(blockId)
-                    if (copyButton) {
-                      copyButton.innerText = 'Copied!'
-                      setTimeout(() => {
-                        copyButton.innerText = 'Copy'
-                      }, 2000)
-                    }
-                  })
-                  .catch(err => console.error('Failed to copy: ', err))
-              }
-              
-              return !inline && match ? (
-                <div className="relative rounded-lg overflow-hidden my-6 shadow-md">
-                  <div className="flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 text-xs font-mono">
-                    <span className="text-gray-500 dark:text-gray-400">{match[1]}</span>
-                    <button 
-                      id={blockId}
-                      onClick={copyToClipboard}
-                      className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200 focus:outline-none"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                  <SyntaxHighlighter
-                    style={oneDark as any}
-                    language={match[1]}
-                    PreTag="div"
-                    showLineNumbers={true}
-                    customStyle={{
-                      backgroundColor: 'rgb(22, 24, 29)',
-                      padding: '1.25rem',
-                      margin: 0,
-                      borderRadius: 0
-                    }}
-                    codeTagProps={{
-                      style: {
-                        fontFamily: 'JetBrains Mono, Monaco, Menlo, Consolas, monospace',
-                        fontSize: '0.875rem',
-                        lineHeight: 1.6
-                      }
-                    }}
+              // For inline code
+              if (inline) {
+                return (
+                  <code 
+                    className="relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm 
+                              bg-muted border border-border" 
                     {...props}
                   >
-                    {codeString}
-                  </SyntaxHighlighter>
+                    {children}
+                  </code>
+                )
+              }
+              
+              // Extract meta information like filename
+              const meta = props["data-meta"] || ''
+              const language = match ? match[1] : ''
+              const filenameMatch = meta?.match(/filename=([^\s]+)/)
+              const filename = filenameMatch ? filenameMatch[1] : null
+              
+              // The code content as a string for copying
+              const codeString = String(children).replace(/\n$/, '')
+              const [isCopied, setIsCopied] = useState(false)
+              
+              const copyToClipboard = useCallback(() => {
+                navigator.clipboard.writeText(codeString)
+                  .then(() => {
+                    setIsCopied(true)
+                    setTimeout(() => setIsCopied(false), 2000)
+                  })
+                  .catch(err => console.error('Failed to copy: ', err))
+              }, [codeString])
+              
+              // Extract highlighted lines if any
+              const highlightMatch = meta?.match(/\{([\d,-]+)\}/)
+              const highlightLines: number[] = []
+              
+              if (highlightMatch) {
+                const lineNumbers = highlightMatch[1].split(',')
+                lineNumbers.forEach((num: string) => {
+                  if (num.includes('-')) {
+                    const [start, end] = num.split('-').map(Number)
+                    if (start !== undefined && end !== undefined) {
+                      for (let i = start; i <= end; i++) {
+                        highlightLines.push(i)
+                      }
+                    }
+                  } else {
+                    const lineNum = Number(num)
+                    if (!isNaN(lineNum)) {
+                      highlightLines.push(lineNum)
+                    }
+                  }
+                })
+              }
+              
+              // Add data attribute for highlighted lines
+              const dataLine = highlightLines.length ? highlightLines.join(',') : ''
+              
+              return (
+                <div className="code-block relative not-prose group">
+                  {/* Filename header if present */}
+                  {filename && (
+                    <div className="file-header">
+                      <span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                          <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                        {filename}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Language indicator */}
+                  {language && (
+                    <div className="language-badge">
+                      {language}
+                    </div>
+                  )}
+                  
+                  {/* Pre element with code content */}
+                  <pre className={`${className || ''} line-numbers`} data-line={dataLine}>
+                    <code className={className || ''}>
+                      {children}
+                    </code>
+                  </pre>
+                  
+                  {/* Copy button */}
+                  <button
+                    className="copy-button"
+                    onClick={copyToClipboard}
+                    aria-label={isCopied ? "Copied!" : "Copy code"}
+                  >
+                    {isCopied ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-primary">
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
-              ) : (
-                <code className="bg-gray-200 dark:bg-gray-800 rounded px-1.5 py-0.5 text-sm font-mono" {...props}>
-                  {children}
-                </code>
               )
             },
             // Custom parser for React Markdown to detect our special formats

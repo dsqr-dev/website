@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ThemeProvider } from './providers'
+import { Footer } from './footer'
 import { Outlet } from '@tanstack/react-router'
 
 // In Vite, we need to handle fonts differently without next/font
@@ -49,7 +50,10 @@ export default function RootLayout() {
       enableColorScheme
     >
       <div style={fontStyles as React.CSSProperties} className="font-mono antialiased">
-        <Outlet />
+        <div className="flex flex-col">
+          <Outlet />
+          <Footer />
+        </div>
       </div>
     </ThemeProvider>
   )

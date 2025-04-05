@@ -28,6 +28,13 @@ const postsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/posts',
   component: PostsPage,
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      category: search.category as string | undefined,
+      sort: search.sort as string | undefined,
+      order: search.order as 'asc' | 'desc' | undefined,
+    }
+  },
 })
 
 const postRoute = createRoute({
@@ -57,8 +64,12 @@ const routeTree = rootRoute.addChildren([
   miscRoute,
 ])
 
-// Create the router
-export const router = createRouter({ routeTree })
+// Create the router with proper defaults and validation
+export const router = createRouter({ 
+  routeTree,
+  defaultPreload: 'intent',
+  defaultPreloadStaleTime: 0,
+})
 
 // Register types
 declare module '@tanstack/react-router' {

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { SocialLinks } from '@/components/social-links'
+import { TerminalPath } from '@/components/terminal-path'
 import { BadgeInfoIcon, BriefcaseIcon, Code2Icon, LayersIcon, SparklesIcon, CodeIcon } from 'lucide-react'
 
 type Job = {
@@ -55,9 +56,22 @@ export default function AboutPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="max-w-3xl mx-auto px-4 pt-16 pb-12">
+    <main className="max-w-3xl mx-auto px-4 pt-16 pb-12 flex-1">
         <SocialLinks />
+        
+        {/* Terminal-style path indicator */}
+        <div className="max-w-2xl mx-auto mb-5 text-center">
+          <TerminalPath 
+            path={[
+              { 
+                name: 'about', 
+                href: '/about', 
+                color: 'text-purple-500 dark:text-purple-400' 
+              }
+            ]} 
+            filename="" 
+          />
+        </div>
         
         {/* About Me Section */}
         <section className="mb-12">
@@ -266,11 +280,10 @@ export default function AboutPage() {
           </div>
         </section>
         
-        {/* Footer */}
-        <footer className="mt-12 text-center text-sm text-muted-foreground">
+        {/* Contact info */}
+        <div className="mt-12 text-center text-sm text-muted-foreground">
           <p>Want to work together? Feel free to reach out.</p>
-        </footer>
+        </div>
       </main>
-    </div>
   )
 }

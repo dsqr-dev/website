@@ -1,16 +1,76 @@
 ---
-title: "Managing Cloudflare Tunnels with CLI"
+title: "Managing Cloudflare Tunnels with CLI on NixOS"
 date: "2025-03-24"
-category: "TIL"
-description: "Basic commands to create and manage Cloudflare tunnels using the CLI"
+category: "NixWithMe"
+description: "How to set up and manage Cloudflare tunnels using CLI on NixOS"
 ---
 
-These commands should get you started with creating and managing Cloudflare tunnels from the command line:
+## Installing cloudflared on NixOS
+
+There are several ways to install the Cloudflare Tunnel CLI tool on NixOS:
+
+### Using configuration.nix
+
+```nix
+{ config, pkgs, ... }:
+
+{
+  environment.systemPackages = with pkgs; [
+    cloudflared
+  ];
+}
+```
+
+### Using Home Manager
+
+```nix
+{ config, pkgs, ... }:
+
+{
+  home.packages = with pkgs; [
+    cloudflared
+  ];
+}
+```
+
+### Using Flake.nix
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Other inputs...
+  };
+
+  outputs = { self, nixpkgs, ... }: {
+    nixosConfigurations.myhost = nixpkgs.lib.nixosSystem {
+      # ...
+      modules = [
+        # ...
+        ({ config, pkgs, ... }: {
+          environment.systemPackages = [ pkgs.cloudflared ];
+        })
+      ];
+    };
+  };
+}
+```
+
+### Command Line Installation
 
 ```bash
-# Install cloudflared CLI tool
-brew install cloudflare/cloudflare/cloudflared
+# Using nix-env
+nix-env -iA nixos.cloudflared
 
+# Using nix profile (flakes)
+nix profile install nixpkgs#cloudflared
+```
+
+## CLI Commands
+
+These commands will get you started with managing Cloudflare tunnels:
+
+```bash
 # Login to Cloudflare
 cloudflared tunnel login
 
@@ -31,14 +91,12 @@ cloudflared tunnel run <tunnel-name>
 
 # Configure a tunnel with a config file
 cloudflared tunnel --config config.yml run <tunnel-name>
-
-# Example config file (config.yml):
-# tunnel: <tunnel-id>
-# credentials-file: /path/to/credentials.json
-# ingress:
-#   - hostname: example.com
-#     service: http://localhost:3000
-#   - service: http_status:404
 ```
 
-These basic commands cover the essentials for creating and managing Cloudflare tunnels through the command line interface.
+## More Information
+
+For more advanced setups and resources:
+
+- **Kubernetes Deployment**: Check out my [Cloudflared Helm chart](https://github.com/0xdsqr/nix-config/tree/development/helm-charts/cloudflared) for deploying Cloudflare tunnels in Kubernetes
+- **NixOS Documentation**: The [NixOS services.cloudflared documentation](https://search.nixos.org/options?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=services.cloudflared) provides detailed configuration options
+- **Tunnel Setup Reference**: For comprehensive setup instructions, see the [Cloudflare documentation](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/)

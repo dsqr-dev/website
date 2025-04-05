@@ -19,6 +19,9 @@ const config = {
       },
     },
     extend: {
+      fontSize: {
+        '2xs': '0.625rem', // Extra-extra-small for mobile displays
+      },
       fontFamily: {
         sans: ["var(--font-inter)", ...fontFamily.sans],
         mono: ["var(--font-mono)", ...fontFamily.mono],

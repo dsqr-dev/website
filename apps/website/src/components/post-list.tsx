@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { useState, useEffect } from 'react'
+import { Link, useRouter, useSearch } from '@tanstack/react-router'
 import { EyeIcon, TagIcon, ChevronUpIcon, ChevronDownIcon, CalendarIcon, FilterIcon } from 'lucide-react'
 import type { Post } from '@/lib/content'
 
@@ -8,11 +8,51 @@ interface PostListProps {
 }
 
 type CategoryFilter = 'All' | 'TIL' | 'Blog' | 'Life' | 'NixWithMe'
+type SortBy = 'date' | 'views'
+type SortOrder = 'asc' | 'desc'
 
 export function PostList({ posts }: PostListProps) {
-  const [sortAscending, setSortAscending] = useState(false)
-  const [sortBy, setSortBy] = useState<'date' | 'views'>('date')
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('All')
+  const router = useRouter()
+  let search = {};
+  try {
+    search = useSearch({ from: '/posts' });
+  } catch (error) {
+    // Handle case where route doesn't match
+    console.log('Route not matched for search params');
+  }
+  
+  // Initialize state from URL query parameters
+  const [sortAscending, setSortAscending] = useState<boolean>(search.order === 'asc')
+  const [sortBy, setSortBy] = useState<SortBy>(search.sort === 'views' ? 'views' : 'date')
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(
+    (search.category as CategoryFilter) || 'All'
+  )
+  
+  // Update URL when filters change
+  useEffect(() => {
+    try {
+      const newSearch = {
+        ...search,
+        category: categoryFilter === 'All' ? undefined : categoryFilter,
+        sort: sortBy,
+        order: sortAscending ? 'asc' : 'desc',
+      }
+      
+      // Remove undefined values
+      Object.keys(newSearch).forEach(key => {
+        if (newSearch[key] === undefined) {
+          delete newSearch[key]
+        }
+      })
+      
+      router.navigate({
+        search: newSearch,
+        replace: true,
+      })
+    } catch (error) {
+      console.error('Failed to update URL with search params', error);
+    }
+  }, [sortAscending, sortBy, categoryFilter, router])
 
   const filteredAndSortedPosts = [...posts]
     .filter((post) => categoryFilter === 'All' || post.category === categoryFilter)
@@ -74,7 +114,9 @@ export function PostList({ posts }: PostListProps) {
                           ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300'
                           : category === 'NixWithMe'
                             ? 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300'
-                            : 'bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300'
+                            : category === 'Life'
+                              ? 'bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300'
+                              : 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300'
                     : 'bg-muted text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -114,7 +156,9 @@ export function PostList({ posts }: PostListProps) {
                           ? 'text-indigo-600 dark:text-indigo-400'
                           : post.category === 'NixWithMe'
                             ? 'text-cyan-600 dark:text-cyan-400'
-                            : 'text-rose-600 dark:text-rose-400'
+                            : post.category === 'Life'
+                              ? 'text-rose-600 dark:text-rose-400'
+                              : 'text-gray-600 dark:text-gray-400'
                     }`}
                   >
                     <TagIcon className="w-3 h-3 flex-shrink-0" />

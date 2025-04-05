@@ -1,13 +1,21 @@
 import { useState, useEffect } from 'react'
 import { getAllPosts } from '@/lib/content'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { PostList } from '@/components/post-list'
 import { SocialLinks } from '@/components/social-links'
+import { TerminalPath } from '@/components/terminal-path'
+import { useSearch } from '@tanstack/react-router'
 import type { Post } from '@/lib/content'
 
 export default function PostsPage() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  let search = {};
+  try {
+    search = useSearch({ from: '/posts' });
+  } catch (error) {
+    // Handle case where route doesn't match
+    console.log('Route not matched for search params');
+  }
 
   useEffect(() => {
     async function loadPosts() {
@@ -25,18 +33,21 @@ export default function PostsPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="max-w-2xl mx-auto px-4 pt-16 pb-8">
+    <main className="max-w-2xl mx-auto px-4 pt-16 pb-8 flex-1">
         {/* Top navigation */}
         <SocialLinks />
         
-        {/* Breadcrumb - this is the correct pattern from the original app */}
-        <div className="mb-8">
-          <Breadcrumb
-            items={[
-              { label: "0xdsqr", href: "/" },
-              { label: "posts", href: "/posts" },
-            ]}
+        {/* Terminal-style path indicator */}
+        <div className="mb-8 text-center">
+          <TerminalPath 
+            path={[
+              { 
+                name: 'posts', 
+                href: '/posts', 
+                color: 'text-purple-500 dark:text-purple-400' 
+              }
+            ]} 
+            filename={search.category ? `filter:${search.category}` : ''} 
           />
         </div>
         
@@ -55,6 +66,5 @@ export default function PostsPage() {
           )}
         </div>
       </main>
-    </div>
   )
 }

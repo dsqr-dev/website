@@ -115,6 +115,91 @@ const user: User = {
 console.log(getUserInfo(user));
 ```
 
+### Python
+
+```python
+def fibonacci(n):
+    """Generate the Fibonacci sequence up to n"""
+    a, b = 0, 1
+    result = []
+    while a < n:
+        result.append(a)
+        a, b = b, a + b
+    return result
+
+# Print the first 10 Fibonacci numbers
+fib_numbers = fibonacci(100)
+print(f"Fibonacci sequence: {fib_numbers}")
+
+# Using a class
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+    
+    def greet(self):
+        return f"Hello, my name is {self.name} and I'm {self.age} years old."
+
+# Create a person object
+alice = Person("Alice", 30)
+print(alice.greet())
+```
+
+### Go
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+// Simple function to greet someone
+func greet(name string) string {
+	return fmt.Sprintf("Hello, %s! Welcome to Go.", name)
+}
+
+// A custom struct
+type Task struct {
+	ID          int
+	Description string
+	Done        bool
+	CreatedAt   time.Time
+}
+
+func main() {
+	// Basic variable declaration
+	message := greet("Gopher")
+	fmt.Println(message)
+	
+	// Create a slice of tasks
+	tasks := []Task{
+		{
+			ID:          1,
+			Description: "Learn Go basics",
+			Done:        true,
+			CreatedAt:   time.Now().Add(-24 * time.Hour),
+		},
+		{
+			ID:          2,
+			Description: "Build a web server",
+			Done:        false,
+			CreatedAt:   time.Now(),
+		},
+	}
+	
+	// Loop through tasks
+	for _, task := range tasks {
+		status := "Pending"
+		if task.Done {
+			status = "Completed"
+		}
+		fmt.Printf("Task %d: %s [%s]\n", task.ID, task.Description, status)
+	}
+}
+```
+
 ### Bash/Shell
 
 ```bash

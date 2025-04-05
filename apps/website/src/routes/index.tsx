@@ -27,8 +27,7 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <main className="max-w-2xl mx-auto px-4 pt-16 pb-8">
+    <main className="max-w-2xl mx-auto px-4 pt-16 pb-8 flex-1">
         <SocialLinks />
         
         <Newsletter />
@@ -51,13 +50,6 @@ export default function HomePage() {
             </>
           )}
         </div>
-        <footer className="mt-8 py-6 border-t border-border flex items-center justify-between text-sm text-muted-foreground">
-          <div>Dave Dennis (@0xdsqr)</div>
-          <a href="https://github.com/dsqr-dev" className="hover:text-primary transition-colors">
-            <GithubIcon className="w-5 h-5" />
-          </a>
-        </footer>
       </main>
-    </div>
   )
 }

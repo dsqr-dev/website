@@ -94,6 +94,7 @@ export default function AboutPage() {
             <p className="text-sm mt-4">
               <Link
                 to="/posts"
+                search={{category: undefined, sort: undefined, order: undefined}}
                 className="inline-flex items-center text-purple-500 hover:text-purple-600 transition-colors"
               >
                 Read my blog posts

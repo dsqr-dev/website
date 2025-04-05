@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import Prism from 'prismjs'
+import 'prismjs/components/prism-yaml'
 import { SocialLinks } from '@/components/social-links'
 import { PostToc, TocItem } from '@/components/post-toc'
 import { TerminalPath } from '@/components/terminal-path'
@@ -48,9 +50,23 @@ bingbong
       sections.forEach((section) => observer.unobserve(section))
     }
   }, [])
+  
+  // Apply syntax highlighting
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Apply syntax highlighting with a small delay to ensure DOM is fully rendered
+      const timer = setTimeout(() => {
+        Prism.highlightAll()
+      }, 0)
+      
+      return () => {
+        clearTimeout(timer)
+      }
+    }
+  }, [])
 
   return (
-    <main className="max-w-5xl mx-auto px-4 pt-16 pb-12">
+    <main className="max-w-5xl mx-auto px-4 pt-16 pb-12 w-full">
       {/* Top navigation */}
       <SocialLinks />
       
@@ -74,24 +90,39 @@ bingbong
       </div>
       
       <div className="relative w-full">
-        {/* Main content - expanded to use more space */}
-        <div className="w-full pr-0 md:pr-64">
-          {/* Main content */}
-          <div className="space-y-8 w-full">
+        {/* Main content */}
+        <div className="w-full"> 
+          {/* Main content wrapper */}
+          <div className="space-y-8 max-w-2xl mx-auto px-4">
             <section id="gpg-key" className="w-full">
               <h2 className="text-2xl font-semibold mb-4">GPG Key</h2>
-              <div className="relative w-full block">
-                <pre className="p-4 bg-muted rounded-lg overflow-x-auto text-sm font-mono w-full block">{gpgKey}</pre>
-                <Button variant="outline" size="icon" className="absolute top-2 right-2" onClick={copyToClipboard}>
-                  {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                </Button>
+              <div className="code-block relative not-prose group w-full" style={{ width: '100%' }}>
+                <pre className="p-0 overflow-x-auto w-full language-yaml line-numbers code-block" style={{ width: '100%' }}>
+                  <code className="language-yaml p-4 block w-full" style={{ width: '100%', display: 'block' }}>{gpgKey}</code>
+                </pre>
+                <button
+                  className="copy-button"
+                  onClick={copyToClipboard}
+                  aria-label={copied ? "Copied!" : "Copy code"}
+                >
+                  {copied ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-primary">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                  )}
+                </button>
               </div>
             </section>
           </div>
         </div>
 
-        {/* Desktop Table of Contents - Right sidebar, fixed position */}
-        <div className="hidden md:block absolute top-0 -right-64 w-56">
+        {/* Desktop Table of Contents - Right sidebar */}
+        <div className="hidden md:block absolute right-4 top-0">
           <div className="sticky top-8">
             <h3 className="text-lg font-semibold mb-4">On this page</h3>
             <PostToc activeSection={activeSection} items={tocItems} />

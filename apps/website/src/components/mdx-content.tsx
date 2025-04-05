@@ -16,6 +16,13 @@ import 'prismjs/components/prism-css'
 import 'prismjs/components/prism-bash'
 import 'prismjs/components/prism-json'
 import 'prismjs/components/prism-markdown'
+// Add more language support
+import 'prismjs/components/prism-python'
+import 'prismjs/components/prism-go'
+import 'prismjs/components/prism-yaml'
+import 'prismjs/components/prism-docker'
+import 'prismjs/components/prism-c'
+import 'prismjs/components/prism-cpp'
 
 // Add Nix language support manually since it's not included by default
 Prism.languages.nix = {
@@ -104,21 +111,18 @@ export function MdxContent({ content }: MdxContentProps) {
   
   const processedContent = processMarkdown(content)
   
-  // Highlight all code blocks after render
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Add a small delay to ensure DOM is fully rendered
-      const timer = setTimeout(() => {
-        Prism.highlightAll()
-      }, 0)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [processedContent])
-  
-  // Enable line numbering when component mounts
-  useEffect(() => {
+  // Simplified line number function that won't cause flickering
+  const addLineNumbers = useCallback(() => {
     document.querySelectorAll('pre.line-numbers').forEach(pre => {
+      // Skip if already processed
+      if (pre.querySelector('.line-numbers-rows')) return;
+      
+      // Add code-block class for styling
+      pre.classList.add('code-block');
+      if (pre.parentElement) {
+        pre.parentElement.classList.add('code-block');
+      }
+      
       const linesCount = (pre.textContent?.match(/\n/g) || []).length + 1;
       
       // Create line number rows
@@ -134,7 +138,62 @@ export function MdxContent({ content }: MdxContentProps) {
       lineNumbersWrapper.innerHTML = lineNumbersMarkup;
       pre.appendChild(lineNumbersWrapper);
     });
-  }, [processedContent])
+  }, []);
+
+  // Combined effect for syntax highlighting and line numbers
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Apply syntax highlighting first
+      const timer = setTimeout(() => {
+        Prism.highlightAll();
+        // Then apply line numbers
+        setTimeout(addLineNumbers, 10);
+      }, 0);
+      
+      // Fallback for late-loading content
+      const fallbackTimer = setTimeout(() => {
+        Prism.highlightAll();
+        addLineNumbers();
+      }, 300);
+      
+      // Handle scroll events
+      const handleScroll = () => {
+        Prism.highlightAll();
+        // Don't reapply line numbers on scroll to avoid flickering
+      };
+      
+      // Debounce scroll events
+      let scrollTimer: number | null = null;
+      const debouncedHandleScroll = () => {
+        if (scrollTimer !== null) {
+          clearTimeout(scrollTimer);
+        }
+        scrollTimer = window.setTimeout(handleScroll, 100);
+      };
+      
+      window.addEventListener('scroll', debouncedHandleScroll);
+      
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(fallbackTimer);
+        window.removeEventListener('scroll', debouncedHandleScroll);
+      }
+    }
+  }, [processedContent, addLineNumbers])
+  
+  // Add a second effect that triggers on window focus
+  useEffect(() => {
+    const handleFocus = () => {
+      Prism.highlightAll()
+      setTimeout(addLineNumbers, 10)
+    }
+    
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [addLineNumbers])
   
   try {
     return (
@@ -143,7 +202,7 @@ export function MdxContent({ content }: MdxContentProps) {
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[
             rehypeSlug, 
-            rehypeAutolinkHeadings,
+            rehypeAutolinkHeadings
           ]}
           components={{
             ...mdxComponents,
@@ -232,7 +291,7 @@ export function MdxContent({ content }: MdxContentProps) {
                   )}
                   
                   {/* Pre element with code content */}
-                  <pre className={`${className || ''} line-numbers`} data-line={dataLine}>
+                  <pre className={`${className || ''} line-numbers code-block`} data-line={dataLine}>
                     <code className={className || ''}>
                       {children}
                     </code>

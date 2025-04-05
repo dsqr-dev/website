@@ -41,6 +41,7 @@ export default function HomePage() {
               <div className="flex justify-end mt-6">
                 <Link
                   to="/posts"
+                  search={{category: undefined, sort: undefined, order: undefined}}
                   className="text-sm text-purple-500 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300 flex items-center gap-1"
                 >
                   View all posts

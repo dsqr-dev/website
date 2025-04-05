@@ -13,9 +13,17 @@ type SortOrder = 'asc' | 'desc'
 
 export function PostList({ posts }: PostListProps) {
   const router = useRouter()
-  let search = {};
+  // Define a type for the search params
+  interface SearchParams {
+    category?: CategoryFilter;
+    sort?: SortBy;
+    order?: string;
+    [key: string]: any;
+  }
+  
+  let search: SearchParams = {};
   try {
-    search = useSearch({ from: '/posts' });
+    search = useSearch({ from: '/posts' }) as SearchParams;
   } catch (error) {
     // Handle case where route doesn't match
     console.log('Route not matched for search params');
@@ -40,13 +48,14 @@ export function PostList({ posts }: PostListProps) {
       
       // Remove undefined values
       Object.keys(newSearch).forEach(key => {
-        if (newSearch[key] === undefined) {
-          delete newSearch[key]
+        const typedKey = key as keyof typeof newSearch;
+        if (newSearch[typedKey] === undefined) {
+          delete newSearch[typedKey]
         }
       })
       
       router.navigate({
-        search: newSearch,
+        search: newSearch as any,
         replace: true,
       })
     } catch (error) {

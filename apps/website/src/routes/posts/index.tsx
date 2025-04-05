@@ -9,9 +9,17 @@ import type { Post } from '@/lib/content'
 export default function PostsPage() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  let search = {};
+  // Define a type for the search params
+  interface SearchParams {
+    category?: string;
+    sort?: string;
+    order?: string;
+    [key: string]: any;
+  }
+  
+  let search: SearchParams = {};
   try {
-    search = useSearch({ from: '/posts' });
+    search = useSearch({ from: '/posts' }) as SearchParams;
   } catch (error) {
     // Handle case where route doesn't match
     console.log('Route not matched for search params');

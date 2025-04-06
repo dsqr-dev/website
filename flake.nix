@@ -12,24 +12,21 @@
       let
         pkgs-unstable = import nixpkgs-unstable { inherit system; };
         pkgs-stable = import nixpkgs-stable { inherit system; };
-      in
-      {
-        # Development shell with all tools needed
+      in {
         devShells.default = pkgs-unstable.mkShell {
           buildInputs = with pkgs-unstable; [
             nodejs_22
             nodePackages.pnpm
-            turbo
             git
             nixpkgs-fmt
           ];
 
           shellHook = ''
-            echo "🟪 development environment ready..."
+            echo "🟪 Dev environment ready"
           '';
         };
 
-        # Format command for Nix files
+        packages.default = websiteApp;
         formatter = pkgs-unstable.nixpkgs-fmt;
       });
 }

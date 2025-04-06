@@ -56,7 +56,7 @@ export async function getAllPosts(): Promise<Post[]> {
   try {
     // Get list of available post slugs - hardcoded for now
     // In a real app, you'd want to use a dynamic method to discover posts
-    const availableSlugs = ['hello-world', 'cloudflare-tunnels-cli'];
+    const availableSlugs = ['hello-world', 'cloudflare-tunnels-cli', 'go-nix-flakes'];
     const posts: Post[] = [];
     
     // Process each post file

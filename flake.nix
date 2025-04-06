@@ -26,7 +26,6 @@
           '';
         };
 
-        packages.default = websiteApp;
         formatter = pkgs-unstable.nixpkgs-fmt;
       });
 }

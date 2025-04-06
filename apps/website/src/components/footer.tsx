@@ -4,7 +4,7 @@ import React from 'react'
 export function PoweredBySection() {
   return (
     <div className="flex items-center space-x-3">
-      <span className="text-muted-foreground">
+      <span className="text-muted-foreground hidden md:inline-block">
         powered by 
         <span className="inline-flex items-center ml-1.5 text-purple-600 dark:text-purple-400">
           <svg 
@@ -18,7 +18,7 @@ export function PoweredBySection() {
         </span>
       </span>
       
-      <span className="text-muted-foreground/40">•</span>
+      <span className="text-muted-foreground/40 hidden md:inline-block">•</span>
       
       <div className="flex items-center space-x-2">
         <a href="https://github.com/dsqr-dev" className="hover:text-primary transition-colors">

@@ -76,7 +76,7 @@ export function Newsletter() {
     <div className="flex flex-col items-center justify-center space-y-8">
       <div className="w-16 h-16 md:w-24 md:h-24 rounded-lg overflow-hidden bg-muted">
         <img
-          src="/me.png"
+          src="/me-ghibli.png"
           alt="0xdsqr"
           className="w-full h-full object-cover"
         />

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { mdxComponents, Important, Note, Tip, Warning, Caution } from './mdx-components'
+import { mdxComponents, Important, Note, Tip, Warning, Caution, MoreInfo } from './mdx-components'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
@@ -91,6 +91,10 @@ const processMarkdown = (markdown: string): string => {
     .replace(/<Caution>([\s\S]*?)<\/Caution>/g, (_, content) => {
       const formattedContent = content.trim().split('\n').join(' ');
       return `:::caution\n${formattedContent}\n:::`;
+    })
+    // Simplified MoreInfo component processing
+    .replace(/<MoreInfo[^>]*>([\s\S]*?)<\/MoreInfo>/g, (_, content) => {
+      return `:::moreinfo\n${content.trim()}\n:::`;
     });
   
   return processedContent;
@@ -210,13 +214,13 @@ export function MdxContent({ content }: MdxContentProps) {
             code({node, inline, className, children, ...props}: any) {
               const match = /language-(\w+)/.exec(className || '')
               
-              // For inline code
-              if (inline) {
+              // For inline code - use better detection to ensure paths like `~/.config/nix/nix.conf` work properly
+              if (inline || (!className && (!node.parent || node.parent.tagName !== 'pre'))) {
                 return (
                   <code 
-                    className="relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm 
-                              bg-muted border border-border" 
+                    className="relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm border" 
                     {...props}
+                    inline="true"
                   >
                     {children}
                   </code>
@@ -349,6 +353,15 @@ export function MdxContent({ content }: MdxContentProps) {
                 }
                 if (text.startsWith(':::caution')) {
                   return <Caution>{extractCalloutContent('caution')}</Caution>;
+                }
+                
+                if (text.startsWith(':::moreinfo')) {
+                  // Simple extraction of content
+                  const content = text.replace(/^:::moreinfo\s*/, '')
+                                      .replace(/\s*:::$/, '')
+                                      .trim();
+                  
+                  return <MoreInfo>{content}</MoreInfo>;
                 }
               }
               

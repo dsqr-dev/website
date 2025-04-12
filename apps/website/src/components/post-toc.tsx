@@ -24,6 +24,7 @@ export function PostToc({ activeSection, items, selector = 'article h2, article 
       return
     }
     
+    // First get all regular headings
     const headings = Array.from(document.querySelectorAll(selector))
       .map(heading => {
         const id = heading.id
@@ -32,6 +33,17 @@ export function PostToc({ activeSection, items, selector = 'article h2, article 
         return { id, text, level }
       })
       .filter(item => item.id && item.text)
+    
+    // Check if we have a "More Information" section and add it to the TOC
+    // But only if it's not already in the headings list
+    const moreInfoSection = document.getElementById('more-information')
+    if (moreInfoSection && !headings.some(h => h.id === 'more-information')) {
+      headings.push({
+        id: 'more-information',
+        text: 'More Information',
+        level: 2
+      })
+    }
 
     setTocItems(headings)
   }, [items, selector])

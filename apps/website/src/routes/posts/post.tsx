@@ -6,7 +6,7 @@ import { SocialLinks } from '@/components/social-links'
 import { PostToc } from '@/components/post-toc'
 import { FloatingTocButton } from '@/components/floating-toc-button'
 import { TerminalPath } from '@/components/terminal-path'
-import { CalendarIcon, EyeIcon, TagIcon } from 'lucide-react'
+import { CalendarIcon, EyeIcon, TagIcon, RefreshCcwIcon } from 'lucide-react'
 import type { Post } from '@/lib/content'
 
 export default function PostPage() {
@@ -134,6 +134,13 @@ export default function PostPage() {
               <TagIcon className="w-4 h-4" />
               {post.category}
             </div>
+            {post.status === 'evolving' && (
+              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-full">
+                <RefreshCcwIcon className="w-4 h-4 evolving-icon" />
+                <span className="text-sm font-medium">Evolving</span>
+                <span className="hidden sm:inline text-xs text-amber-500 dark:text-amber-500">(content will be updated as I learn)</span>
+              </div>
+            )}
           </div>
         </div>
         

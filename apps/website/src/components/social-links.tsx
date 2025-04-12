@@ -1,5 +1,4 @@
 import { Link } from '@tanstack/react-router'
-import { ThemeToggle } from './theme-toggle'
 
 export function SocialLinks() {
   return (
@@ -35,8 +34,6 @@ export function SocialLinks() {
       >
         about
       </Link>
-      <span className="text-muted-foreground">/</span>
-      <ThemeToggle />
     </nav>
   )
 }

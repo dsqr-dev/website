@@ -1,5 +1,5 @@
 // File-based content handling for MDX posts
-import type { PostCategory } from './types'
+import type { PostCategory, PostStatus } from './types'
 import { getPostViews, preloadPostViews } from './views'
 
 export type Post = {
@@ -12,6 +12,7 @@ export type Post = {
   url: string
   content: string
   views?: number
+  status?: PostStatus
 }
 
 // Path to the content files in the public directory
@@ -56,7 +57,14 @@ export async function getAllPosts(): Promise<Post[]> {
   try {
     // Get list of available post slugs - hardcoded for now
     // In a real app, you'd want to use a dynamic method to discover posts
-    const availableSlugs = ['hello-world', 'cloudflare-tunnels-cli', 'go-nix-flakes'];
+    const availableSlugs = [
+      'hello-world', 
+      'cloudflare-tunnels-cli', 
+      'go-nix-flakes',
+      'playing-with-nix-templates',
+      'self-hosting-email-proxmox-nixos',
+      'analytics-cloudflare-api'
+    ];
     const posts: Post[] = [];
     
     // Process each post file
@@ -118,7 +126,8 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       description: frontmatter.description || '',
       slug,
       url: `/posts/${slug}`,
-      content
+      content,
+      status: frontmatter.status as PostStatus || 'published'
     };
     
     try {

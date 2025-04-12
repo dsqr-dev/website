@@ -104,6 +104,13 @@
   border: 1px solid hsl(var(--border));
 }
 
+/* Inline code styling */
+.prose code:not([class*="language-"]) {
+  @apply relative rounded px-[0.3rem] py-[0.2rem] font-mono text-sm;
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+}
+
 .code-block pre {
   @apply m-0 overflow-x-auto py-4;
   font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -324,6 +331,20 @@ pre[class*="language-"].line-numbers {
 
 .token.deleted {
   color: red;
+}
+
+/* Custom animation for evolving indicator */
+@keyframes slow-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.evolving-icon {
+  animation: slow-spin 4s linear infinite;
 }
 
 /* Dark mode adjustments */

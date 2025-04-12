@@ -7,6 +7,9 @@ interface ComponentProps {
   [key: string]: any;
 }
 
+// No special props needed, we'll keep it simple
+interface MoreInfoProps extends ComponentProps {}
+
 // Export callout components directly so they can be imported and used
 export const Important = ({ children }: ComponentProps) => (
   <div className="bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-500 p-4 my-6 rounded-r">
@@ -48,6 +51,26 @@ export const Caution = ({ children }: ComponentProps) => (
   </div>
 )
 
+export function MoreInfo({ children }: MoreInfoProps) {
+  return (
+    <div className="mt-12 mb-8 border-t border-gray-200 dark:border-gray-800 pt-8">
+      {/* Hidden heading for TOC, but visible to screen readers */}
+      <h2 id="more-information" className="sr-only">More Information</h2>
+      
+      <div className="flex gap-5 items-start">
+        <img 
+          src="/me-ghibli.png" 
+          alt="dsqr avatar" 
+          className="w-20 h-20 rounded-full hidden md:block flex-shrink-0"
+        />
+        <div className="prose dark:prose-invert max-w-none prose-a:text-purple-600 prose-a:italic prose-a:dark:text-purple-400 hover:prose-a:underline">
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // All MDX components
 export const mdxComponents = {
   Important,
@@ -55,6 +78,7 @@ export const mdxComponents = {
   Tip,
   Warning,
   Caution,
+  MoreInfo,
   h1: ({ ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
     <h1 className="text-3xl font-bold mt-8 mb-4" {...props} />
   ),
@@ -71,10 +95,10 @@ export const mdxComponents = {
     <p className="leading-7 my-2" {...props} />
   ),
   ul: ({ ...props }: React.HTMLAttributes<HTMLUListElement>) => (
-    <ul className="list-disc list-inside my-4 ml-2" {...props} />
+    <ul className="list-disc list-outside pl-5 my-4" {...props} />
   ),
   ol: ({ ...props }: React.HTMLAttributes<HTMLOListElement>) => (
-    <ol className="list-decimal list-inside my-4 ml-2" {...props} />
+    <ol className="list-decimal list-outside pl-5 my-4" {...props} />
   ),
   li: ({ ...props }: React.HTMLAttributes<HTMLLIElement>) => <li className="my-1" {...props} />,
   blockquote: ({ ...props }: React.HTMLAttributes<HTMLQuoteElement>) => (
@@ -128,7 +152,16 @@ export const mdxComponents = {
   pre: ({ ...props }: React.HTMLAttributes<HTMLPreElement>) => (
     <pre className="rounded-md my-6 overflow-x-auto bg-transparent p-0" {...props} />
   ),
-  code: ({ className, children, ...props }: React.HTMLAttributes<HTMLElement> & { 'data-meta'?: string, 'data-language'?: string }) => {
+  code: ({ className, children, ...props }: React.HTMLAttributes<HTMLElement> & { 
+    'data-meta'?: string, 
+    'data-language'?: string,
+    inline?: boolean,
+    node?: {
+      parentNode?: {
+        tagName?: string
+      }
+    }
+  }) => {
     const match = /language-(\w+)/.exec(className || "")
     // Check for filename metadata in format ```js filename=example.js
     const filenameMatch = props['data-meta']?.match(/filename=([^\s]+)/)
@@ -139,7 +172,13 @@ export const mdxComponents = {
       updatedClassName += ` filename-${filenameMatch[1]}`
     }
 
-    return match ? (
+    // Check if this is an inline code block
+    const isInline = props.inline || 
+                     // Rely on React Markdown's own detection (if parent is not 'pre')
+                     !props.node?.parentNode?.tagName || 
+                     props.node?.parentNode?.tagName !== 'pre'
+
+    return !isInline && match ? (
       // Code block styling - minimal here as rehype plugin handles most styling
       <code 
         className={updatedClassName} 
@@ -150,7 +189,7 @@ export const mdxComponents = {
       </code>
     ) : (
       // Inline code styling
-      <code className="font-mono text-sm px-1.5 py-0.5 rounded bg-gray-100/70 dark:bg-gray-800/70 border border-gray-200/30 dark:border-gray-700/30" {...props}>
+      <code className="font-mono text-sm px-1.5 py-0.5 rounded border" {...props}>
         {children}
       </code>
     )

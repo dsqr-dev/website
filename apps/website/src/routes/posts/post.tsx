@@ -76,12 +76,12 @@ export default function PostPage() {
   }
 
   return (
-    <main className="max-w-4xl mx-auto px-4 pt-16 pb-12 flex-1">
+    <main className="max-w-5xl mx-auto px-2 sm:px-4 pt-10 sm:pt-16 pb-8 sm:pb-12 w-full">
       {/* Top navigation */}
       <SocialLinks />
       
       {/* Terminal-style path indicator with links */}
-      <div className="max-w-2xl mx-auto mb-5 text-center">
+      <div className="max-w-2xl mx-auto mb-3 sm:mb-5 text-center">
         <TerminalPath 
           path={[
             { name: 'posts', href: '/posts', color: 'text-purple-500 dark:text-purple-400' },
@@ -98,64 +98,73 @@ export default function PostPage() {
         />
       </div>
       
-      <div className="relative">
-        {/* Post title and metadata - centered */}
-        <div className="max-w-2xl mx-auto mb-8">
-          {/* Mobile Table of Contents (only visible on mobile) - now placed ABOVE content for better UX */}
-          <div className="md:hidden mb-4">
-            <PostToc activeSection={activeSection} />
-          </div>
+      {/* Mobile Table of Contents for dropdown - matched to content width */}
+      <div className="w-full max-w-2xl mx-auto mb-4 sm:mb-8 lg:hidden px-4">
+        <PostToc activeSection={activeSection} mobileOnly={true} />
+      </div>
+      
+      <div className="relative w-full">
+        {/* Main content and sidebar layout */}
+        <div className="flex flex-col lg:flex-row lg:justify-center">
+          {/* Left spacer to help with centering */}
+          <div className="hidden lg:block lg:w-48"></div>
           
-          <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4" />
-              {new Date(post.date).toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-              })}
-            </div>
-            <div className="flex items-center gap-2">
-              <EyeIcon className="w-4 h-4" />
-              {post.views !== undefined ? post.views : '–'}
-            </div>
-            <div
-              className={`flex items-center gap-2 ${
-                post.category === "TIL"
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : post.category === "Blog"
-                    ? "text-indigo-600 dark:text-indigo-400"
-                    : post.category === "NixWithMe"
-                      ? "text-cyan-600 dark:text-cyan-400"
-                      : "text-rose-600 dark:text-rose-400"
-              }`}
-            >
-              <TagIcon className="w-4 h-4" />
-              {post.category}
-            </div>
-            {post.status === 'evolving' && (
-              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-full">
-                <RefreshCcwIcon className="w-4 h-4 evolving-icon" />
-                <span className="text-sm font-medium">Evolving</span>
-                <span className="hidden sm:inline text-xs text-amber-500 dark:text-amber-500">(content will be updated as I learn)</span>
+          {/* Main content column */}
+          <div className="w-full lg:max-w-2xl lg:mx-0">
+            <div className="space-y-4 sm:space-y-8 px-2 md:px-4">
+              {/* Post title and metadata */}
+              <div className="mb-4 sm:mb-8">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">{post.title}</h1>
+                <div className="flex items-center flex-nowrap text-xs sm:text-sm text-muted-foreground overflow-x-auto pb-1">
+                  <div className="flex items-center gap-1 sm:gap-2 whitespace-nowrap mr-2 sm:mr-4">
+                    <CalendarIcon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                    {new Date(post.date).toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </div>
+                  <div className="flex items-center gap-1 sm:gap-2 whitespace-nowrap mr-2 sm:mr-4">
+                    <EyeIcon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                    {post.views !== undefined ? post.views : '–'}
+                  </div>
+                  <div
+                    className={`flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
+                      post.category === "TIL"
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : post.category === "Blog"
+                          ? "text-indigo-600 dark:text-indigo-400"
+                          : post.category === "NixWithMe"
+                            ? "text-cyan-600 dark:text-cyan-400"
+                            : "text-rose-600 dark:text-rose-400"
+                    }`}
+                  >
+                    <TagIcon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                    {post.category}
+                  </div>
+                  {post.status === 'evolving' && (
+                    <div className="flex items-center gap-1 sm:gap-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-1 sm:px-2 py-0.5 rounded-full whitespace-nowrap ml-2 sm:ml-4 flex-shrink-0">
+                      <RefreshCcwIcon className="w-3 h-3 sm:w-4 sm:h-4 evolving-icon flex-shrink-0" />
+                      <span className="text-xs sm:text-sm font-medium">Evolving</span>
+                      <span className="hidden sm:inline text-xs text-amber-500 dark:text-amber-500">(content will be updated as I learn)</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+              
+              {/* Main content */}
+              <article className="prose prose-sm sm:prose dark:prose-invert w-full">
+                <MdxContent content={post.content} />
+              </article>
+            </div>
           </div>
-        </div>
-        
-        {/* Main content - centered */}
-        <div className="max-w-2xl mx-auto">
-          <article className="prose dark:prose-invert max-w-none">
-            <MdxContent content={post.content} />
-          </article>
-        </div>
 
-        {/* Desktop Table of Contents - Right sidebar, fixed position */}
-        <div className="hidden md:block absolute top-0 -right-64 w-56">
-          <div className="sticky top-8">
-            <h3 className="text-lg font-semibold mb-4">On this page</h3>
-            <PostToc activeSection={activeSection} />
+          {/* Desktop Table of Contents - Right sidebar, now positioned with flexbox */}
+          <div className="hidden lg:block lg:w-56 lg:ml-4">
+            <div className="sticky top-8">
+              <h3 className="text-lg font-semibold mb-4">On this page</h3>
+              <PostToc activeSection={activeSection} desktopOnly={true} />
+            </div>
           </div>
         </div>
         

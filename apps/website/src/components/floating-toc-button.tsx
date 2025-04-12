@@ -65,11 +65,36 @@ export function FloatingTocButton({ activeSection, items }: FloatingTocButtonPro
         )}
       </button>
       
-      {/* Floating TOC panel */}
+      {/* Floating TOC panel - always expanded without dropdown */}
       {isOpen && (
         <div className="floating-toc fixed bottom-16 right-4 z-50 p-4 bg-background border border-border shadow-lg rounded-md max-w-[16rem] max-h-[80vh] overflow-y-auto">
           <h3 className="text-sm font-semibold mb-2">On this page</h3>
-          <PostToc activeSection={activeSection} items={items} />
+          <nav className="space-y-2">
+            {(items || []).length > 0 ? (
+              items?.map(item => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  className={`block text-sm ${
+                    activeSection === item.id 
+                      ? "text-purple-600 dark:text-purple-400" 
+                      : "text-muted-foreground hover:text-foreground"
+                  } ${item.level === 3 ? "ml-4" : ""}`}
+                >
+                  {item.text}
+                </a>
+              ))
+            ) : (
+              <div className="max-h-[60vh] overflow-y-auto">
+                <PostToc 
+                  activeSection={activeSection} 
+                  items={items} 
+                  dropdownAlwaysOpen={true}
+                  showButton={false}
+                />
+              </div>
+            )}
+          </nav>
         </div>
       )}
     </>

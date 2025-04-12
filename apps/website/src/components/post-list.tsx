@@ -240,7 +240,7 @@ export function PostList({ posts }: PostListProps) {
           </div>
         </div>
       </div>
-
+      
       <div className="space-y-4">
         {filteredAndSortedPosts.length > 0 ? (
           filteredAndSortedPosts.map((post) => (

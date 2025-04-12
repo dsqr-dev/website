@@ -53,8 +53,18 @@ function extractContent(content: string) {
 }
 
 // Function to get all posts
+// Cache for all posts list
+let allPostsCache: { posts: Post[], timestamp: number } | null = null;
+const ALL_POSTS_CACHE_TTL = 60 * 1000; // 1 minute
+
 export async function getAllPosts(): Promise<Post[]> {
   try {
+    // Check cache first
+    const now = Date.now();
+    if (allPostsCache && now - allPostsCache.timestamp < ALL_POSTS_CACHE_TTL) {
+      return [...allPostsCache.posts]; // Return a copy to prevent mutations
+    }
+
     // Get list of available post slugs - hardcoded for now
     // In a real app, you'd want to use a dynamic method to discover posts
     const availableSlugs = [
@@ -65,17 +75,11 @@ export async function getAllPosts(): Promise<Post[]> {
       'self-hosting-email-proxmox-nixos',
       'analytics-cloudflare-api'
     ];
-    const posts: Post[] = [];
     
-    // Process each post file
-    for (const slug of availableSlugs) {
-      try {
-        const post = await getPostBySlug(slug);
-        if (post) posts.push(post);
-      } catch (error) {
-        console.error(`Error processing post ${slug}:`, error);
-      }
-    }
+    // Use Promise.all to fetch all posts in parallel
+    const postPromises = availableSlugs.map(slug => getPostBySlug(slug));
+    const postsResults = await Promise.all(postPromises);
+    const posts = postsResults.filter((post): post is Post => post !== null);
     
     // Sort posts by date (newest first)
     const sortedPosts = posts.sort((a, b) => {
@@ -84,18 +88,13 @@ export async function getAllPosts(): Promise<Post[]> {
       return dateB.getTime() - dateA.getTime();
     });
     
-    try {
-      // Fetch view counts for all posts in a single batch request
-      const viewCounts = await preloadPostViews(sortedPosts.map(post => post.slug));
-      
-      // Add view counts to posts
-      for (const post of sortedPosts) {
-        post.views = viewCounts[post.slug] || 0;
-      }
-    } catch (error) {
-      console.error('Error fetching post view counts:', error);
-      // Continue without view counts if there's an error
-    }
+    // No need to load view counts separately as they're already loaded in getPostBySlug
+    
+    // Cache the result
+    allPostsCache = {
+      posts: sortedPosts,
+      timestamp: now
+    };
     
     return sortedPosts;
   } catch (error) {
@@ -105,8 +104,18 @@ export async function getAllPosts(): Promise<Post[]> {
 }
 
 // Function to get a post by slug
+// Cache for posts to prevent repeated fetches
+const postCache: Record<string, { post: Post, timestamp: number }> = {};
+const POST_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
+    // Check cache first
+    const now = Date.now();
+    if (postCache[slug] && now - postCache[slug].timestamp < POST_CACHE_TTL) {
+      return postCache[slug].post;
+    }
+
     // Fetch the post content
     const response = await fetch(`${contentDir}/${slug}.mdx`);
     if (!response.ok) {
@@ -130,14 +139,14 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       status: frontmatter.status as PostStatus || 'published'
     };
     
-    try {
-      // Fetch view count for this post
-      post.views = await getPostViews(slug);
-    } catch (error) {
-      console.error(`Error fetching view count for post ${slug}:`, error);
-      // Set views to 0 if there's an error
-      post.views = 0;
-    }
+    // Get view count (synchronously to avoid delay in rendering)
+    post.views = getPostViews(slug);
+    
+    // Cache the post
+    postCache[slug] = {
+      post,
+      timestamp: now
+    };
     
     return post;
   } catch (error) {

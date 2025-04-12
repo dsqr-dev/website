@@ -49,7 +49,7 @@ export async function getViewsForRoute(route: string): Promise<number> {
       return viewCache[cacheKey].views;
     }
     
-    // Generate mock view count
+    // Generate mock view count (no artificial delay needed for mock data)
     const views = generateMockViewCount(route);
     
     // Cache the result
@@ -109,10 +109,32 @@ function normalizeRoute(route: string): string {
 }
 
 /**
- * Get views for a specific blog post by slug
+ * Get views for a specific blog post by slug (synchronous version)
  */
-export async function getPostViews(slug: string): Promise<number> {
-  return getViewsForRoute(`/posts/${slug}`);
+export function getPostViews(slug: string): number {
+  try {
+    // Check cache first
+    const now = Date.now();
+    const route = `/posts/${slug}`;
+    const cacheKey = `views_${route}`;
+    
+    if (viewCache[cacheKey] && now - viewCache[cacheKey].timestamp < CACHE_TTL) {
+      return viewCache[cacheKey].views;
+    }
+    
+    // Generate mock view count
+    const views = generateMockViewCount(route);
+    
+    // Cache the result
+    viewCache[cacheKey] = {
+      views,
+      timestamp: now
+    };
+    
+    return views;
+  } catch (error) {
+    return 0;
+  }
 }
 
 /**

@@ -201,7 +201,7 @@ export function MdxContent({ content }: MdxContentProps) {
   
   try {
     return (
-      <div className="mdx prose dark:prose-invert prose-pre:p-0 prose-code:text-sm prose-code:font-normal w-full max-w-none">
+      <div className="mdx prose dark:prose-invert prose-pre:p-0 prose-code:text-sm prose-code:font-normal w-full md:max-w-2xl">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[

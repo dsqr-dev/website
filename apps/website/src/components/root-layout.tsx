@@ -49,7 +49,7 @@ export default function RootLayout() {
       disableTransitionOnChange
       enableColorScheme
     >
-      <div style={fontStyles as React.CSSProperties} className="font-mono antialiased">
+      <div style={fontStyles as React.CSSProperties} className="font-mono antialiased overflow-x-hidden">
         <div className="flex flex-col">
           <Outlet />
           <Footer />
